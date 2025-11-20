@@ -32,6 +32,7 @@ if (process.env.SERVER_ENV !== "development") {
         sameSite: "none",
         secure: true,
         domain: process.env.SERVER_URL,
+        path: "/",
     };
 }
 
