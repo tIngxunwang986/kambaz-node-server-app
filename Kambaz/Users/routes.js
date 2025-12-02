@@ -1,7 +1,9 @@
 import UsersDao from "./dao.js";
+import CoursesDao from "../courses/dao.js";
 
 export default function UserRoutes(app) {
     const dao = UsersDao();
+    const coursesDao = CoursesDao();
 
     const createUser = async (req, res) => {
         const User = await dao.createUser(req.body);
@@ -90,6 +92,21 @@ export default function UserRoutes(app) {
         res.json(currentUser);
     };
 
+    const findCoursesForCurrentUser = async (req, res) => {
+        const currentUser = req.session["currentUser"];
+        if (!currentUser) {
+            res.sendStatus(401);
+            return;
+        }
+        try {
+            const courses = await coursesDao.findCoursesForEnrolledUser(currentUser._id);
+            res.json(courses);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    };
+
+    app.get("/api/users/current/courses", findCoursesForCurrentUser);
     app.post("/api/users", createUser);
     app.get("/api/users", findAllUsers);
     app.get("/api/users/:userId", findUserById);
@@ -99,5 +116,5 @@ export default function UserRoutes(app) {
     app.post("/api/users/signup", signup);
     app.post("/api/users/signin", signin);
     app.post("/api/users/signout", signout);
-    app.post("/api/users/profile", profile);
+    app.get("/api/users/profile", profile);
 }
