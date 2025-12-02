@@ -1,30 +1,51 @@
 import EnrollmentsDao from "./dao.js";
 
-export default function EnrollmentsRoutes(app, db) {
-    const dao = EnrollmentsDao(db);
+export default function EnrollmentsRoutes(app) {
+    const dao = EnrollmentsDao();
 
-    const findAllEnrollments = (req, res) => {
-        const enrollments = dao.findAllEnrollments();
-        res.json(enrollments);
-    };
-
-    const enroll = (req, res) => {
-        const { user, course } = req.body;
-        const enrollment = dao.enrollUserInCourse(user, course);
-        if (!enrollment) {
-            res.sendStatus(204);
-        } else {
-            res.json(enrollment);
+    const findAllEnrollments = async (req, res) => {
+        try {
+            const enrollments = await dao.findAllEnrollments();
+            res.json(enrollments);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
         }
     };
 
-    const unenroll = (req, res) => {
-        const { enrollmentId } = req.params;
-        dao.unenroll(enrollmentId);
-        res.sendStatus(200);
+    const findEnrollmentsForCurrentUser = async (req, res) => {
+        const currentUser = req.session["currentUser"];
+        if (!currentUser) {
+            return res.status(401).json({ message: "Not authenticated" });
+        }
+        try {
+            const enrollments = await dao.findEnrollmentsForUser(currentUser._id);
+            res.json(enrollments);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
     };
 
-    app.get("/api/enrollments", findAllEnrollments);
+    const enroll = async (req, res) => {
+        const { user, course } = req.body;
+        try {
+            const enrollment = await dao.enrollUserInCourse(user, course);
+            res.json(enrollment);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    };
+
+    const unenroll = async (req, res) => {
+        const { enrollmentId } = req.params;
+        try {
+            await dao.unenrollById(enrollmentId);
+            res.sendStatus(200);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    };
+
+    app.get("/api/enrollments", findEnrollmentsForCurrentUser);
     app.post("/api/enrollments", enroll);
     app.delete("/api/enrollments/:enrollmentId", unenroll);
 }
