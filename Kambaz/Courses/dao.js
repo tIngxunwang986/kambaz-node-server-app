@@ -1,22 +1,13 @@
 import model from "./model.js";
 import { v4 as uuidv4 } from "uuid";
 
-export default function CoursesDao(db) {
+export default function CoursesDao() {
     function findAllCourses() {
-        return model.find({}, { name: 1, description: 1 });
+        return model.find({}, { name: 1, description: 1, number: 1, image: 1, startDate: 1, endDate: 1 });
     }
 
-    async function findCoursesForEnrolledUser(userId) {
-        const { enrollments } = db;
-        const courses = await model.find({}, { name: 1, description: 1 });
-        const enrolledCourses = courses.filter((course) =>
-            enrollments.some(
-                (enrollment) =>
-                    enrollment.user === userId &&
-                    enrollment.course === course._id
-            )
-        );
-        return enrolledCourses;
+    function findCourseById(courseId) {
+        return model.findById(courseId);
     }
 
     function createCourse(course) {
@@ -34,7 +25,7 @@ export default function CoursesDao(db) {
 
     return {
         findAllCourses,
-        findCoursesForEnrolledUser,
+        findCourseById,
         createCourse,
         deleteCourse,
         updateCourse,

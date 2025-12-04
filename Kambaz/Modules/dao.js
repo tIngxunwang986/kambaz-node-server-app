@@ -1,15 +1,20 @@
 import { v4 as uuidv4 } from "uuid";
 import model from "../Courses/model.js";
 
-export default function ModulesDao(db) {
+export default function ModulesDao() {
     async function findModulesForCourse(courseId) {
         const course = await model.findById(courseId);
-        return course.modules;
+        return course?.modules || [];
+    }
+
+    async function findModuleById(courseId, moduleId) {
+        const course = await model.findById(courseId);
+        return course?.modules?.id(moduleId) || null;
     }
 
     async function createModule(courseId, module) {
         const newModule = { ...module, _id: uuidv4() };
-        const status = await model.updateOne(
+        await model.updateOne(
             { _id: courseId },
             { $push: { modules: newModule } }
         );
@@ -34,6 +39,7 @@ export default function ModulesDao(db) {
 
     return {
         findModulesForCourse,
+        findModuleById,
         createModule,
         deleteModule,
         updateModule,

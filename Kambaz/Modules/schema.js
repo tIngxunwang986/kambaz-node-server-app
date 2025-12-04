@@ -1,11 +1,16 @@
 import mongoose from "mongoose";
 
-const schema = new mongoose.Schema(
-    {
-        _id: String,
-        name: String,
-        description: String,
-        lessons: [{ _id: String, name: String, description: String }],
-    }
-);
-export default schema;
+const lessonSchema = new mongoose.Schema({
+    _id: String,
+    name: String,
+    description: String,
+});
+
+const moduleSchema = new mongoose.Schema({
+    _id: String,
+    name: String,
+    description: String,
+    lessons: [lessonSchema],
+});
+
+export default moduleSchema;

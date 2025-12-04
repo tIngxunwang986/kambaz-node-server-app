@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import Hello from "./Hello.js";
 import Lab5 from "./Lab5/index.js";
 import cors from "cors";
-import db from "./Kambaz/Database/index.js";
 import UserRoutes from "./Kambaz/Users/routes.js";
 import session from "express-session";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
@@ -21,7 +20,7 @@ const app = express();
 
 app.use(
     cors({
-        origin: process.env.CLIENT_URL || "https://kambaz-next-js5.vercel.app",
+        origin: process.env.CLIENT_URL || "http://localhost:3000",
         credentials: true,
     })
 );
@@ -30,23 +29,23 @@ const sessionOptions = {
     secret: process.env.SESSION_SECRET || "kambaz",
     resave: false,
     saveUninitialized: false,
-    cookie: {
+};
+
+if (process.env.NODE_ENV === "production") {
+    sessionOptions.proxy = true;
+    sessionOptions.cookie = {
         sameSite: "none",
         secure: true,
         path: "/",
-    },
-};
-
-if (process.env.SERVER_ENV !== "development") {
-    sessionOptions.proxy = true;
+    };
 }
 
 app.use(session(sessionOptions));
 app.use(express.json());
 
-UserRoutes(app, db);
-CourseRoutes(app, db);
-ModulesRoutes(app, db);
+UserRoutes(app);
+CourseRoutes(app);
+ModulesRoutes(app);
 AssignmentsRoutes(app);
 EnrollmentsRoutes(app);
 Hello(app);

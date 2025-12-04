@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const enrollmentSchema = new mongoose.Schema(
     {
+        _id: { type: mongoose.Schema.Types.Mixed },
         course: { type: String, ref: "CourseModel", required: true },
         user: { type: String, ref: "UserModel", required: true },
         grade: Number,
@@ -13,7 +14,7 @@ const enrollmentSchema = new mongoose.Schema(
             default: "ENROLLED",
         },
     },
-    { collection: "enrollments" }
+    { collection: "enrollments", _id: false }
 );
 
 export default enrollmentSchema;
